@@ -166,5 +166,5 @@ POST /api/contact/            Contact form (Django endpoint — unused, handled 
 
 **Maxim Simeonov Ivanov**  
 
-maksimivanov@tutamail.com
-https://github.com/MaximSimeonovIvanov
+- maksimivanov@tutamail.com
+- https://github.com/MaximSimeonovIvanov
