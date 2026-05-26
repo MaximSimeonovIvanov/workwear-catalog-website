@@ -2,7 +2,7 @@
 
 A full-stack product catalog website for a family-owned workwear store in Gabrovo, Bulgaria.
 
-**🌐 Live site:** [sim-obleklo.bg](https://sim-obleklo.bg)  
+**🌐 Live site:** [sim-obleklo.bg](https://sim-obleklo.bg)  # soon to be deployed
 **🛠️ Stack:** Django · Next.js 14 · PostgreSQL · Docker · Cloudinary
 
 ---
