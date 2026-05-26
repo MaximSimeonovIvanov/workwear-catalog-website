@@ -1,8 +1,8 @@
-# СИМ - Работно Облекло
+# СИМ — Работно Облекло 🦺
 
 A full-stack product catalog website for a family-owned workwear store in Gabrovo, Bulgaria.
 
-**Live site:** https://sim-obleklo.bg  
+**🌐 Live site:** [sim-obleklo.bg](https://sim-obleklo.bg)  
 **Stack:** Django · Next.js 14 · PostgreSQL · Docker · Cloudinary
 
 ---
@@ -13,7 +13,7 @@ A modern, SEO-friendly product catalog built with a headless CMS architecture. T
 
 ---
 
-## Features
+## Features ✨
 
 - Product catalog with category browsing and tag-based filtering
 - Full-text search across products
@@ -27,7 +27,7 @@ A modern, SEO-friendly product catalog built with a headless CMS architecture. T
 
 ---
 
-## Tech Stack
+## Tech Stack 🛠️
 
 | Layer | Technology |
 |---|---|
@@ -47,21 +47,24 @@ A modern, SEO-friendly product catalog built with a headless CMS architecture. T
 
 ## Architecture
 
+```
 Browser → Cloudflare CDN → Nginx Proxy Manager
-↓
-Next.js (port 3000)
-↓
-Django REST API (port 8000)
-↓
-PostgreSQL (port 5432)
+                                    ↓
+                           Next.js (port 3000)
+                                    ↓
+                        Django REST API (port 8000)
+                                    ↓
+                          PostgreSQL (port 5432)
+```
 
 Images are stored on Cloudinary and served via their CDN. Contact form submissions are processed server-side and delivered via Resend.
 
 ---
 
-## Local Development
+## Local Development 🚀
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - Git
 
@@ -78,13 +81,15 @@ docker compose up --build
 ```
 
 ### Services
+
 | Service | URL |
 |---|---|
 | Next.js frontend | http://localhost:3000 |
 | Django API | http://localhost:8000 |
 | Django admin | http://localhost:8000/admin |
 
-### First run
+### First Run
+
 ```bash
 docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py createsuperuser
@@ -96,6 +101,7 @@ docker compose exec backend python manage.py createsuperuser
 
 See `.env.example` for all required variables:
 
+```
 DATABASE_URL
 SECRET_KEY
 DEBUG
@@ -106,11 +112,13 @@ CLOUDINARY_API_SECRET
 RESEND_API_KEY
 CONTACT_EMAIL
 NEXT_PUBLIC_API_URL
+```
 
 ---
 
-## Project Structure
+## Project Structure 📁
 
+```
 workwear-catalog/
 ├── backend/                  # Django project
 │   ├── config/               # Settings, URLs
@@ -122,27 +130,40 @@ workwear-catalog/
 │   └── lib/                  # API client, TypeScript types
 ├── docker-compose.yml
 └── .env.example
+```
 
 ---
 
 ## API Endpoints
 
-GET /api/products/              List products (supports ?category, ?brand, ?tag, ?search, ?featured)
-GET /api/products/{slug}/       Product detail
-GET /api/categories/            Category list with children
-GET /api/brands/                Brand list
-GET /api/tags/                  Tag list
-GET /api/store-info/            Store details
-POST /api/contact/              Contact form (Django endpoint - unused, handled by Next.js)
+```
+GET  /api/products/           List products (supports ?category, ?brand, ?tag, ?search, ?featured)
+GET  /api/products/{slug}/    Product detail
+GET  /api/categories/         Category list with children
+GET  /api/brands/             Brand list
+GET  /api/tags/               Tag list
+GET  /api/store-info/         Store details
+POST /api/contact/            Contact form (Django endpoint — unused, handled by Next.js)
+```
 
 ---
 
 ## Data Model
 
-- **Category** — hierarchical (parent/child), slug-based URLs
-- **Brand** — filterable, with logo
-- **Tag** — many-to-many with products (waterproof, flame resistant, etc.)
-- **Product** — belongs to category and brand, has many tags, images, and variants
-- **ProductImage** — multiple images per product, primary image flag
-- **ProductVariant** — size and color variants (display only)
-- **StoreInfo** — single-instance model for store details and opening hours
+| Model | Description |
+|---|---|
+| **Category** | Hierarchical (parent/child), slug-based URLs |
+| **Brand** | Filterable, with logo |
+| **Tag** | Many-to-many with products (waterproof, flame resistant, etc.) |
+| **Product** | Belongs to category and brand; has many tags, images, and variants |
+| **ProductImage** | Multiple images per product, primary image flag |
+| **ProductVariant** | Size and color variants (display only) |
+| **StoreInfo** | Single-instance model for store details and opening hours |
+
+---
+
+## Author
+
+**Maxim Simeonov Ivanov**  
+your@email.com  
+https://github.com/MaximSimeonovIvanov
