@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: workwear
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - workwear-network
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - ./backend:/app
+    expose:
+      - "8000"
+    env_file:
+      - .env.production
+    depends_on:
+      - db
+    networks:
+      - workwear-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file:
+      - .env.production
+    networks:
+      - workwear-network
+
+networks:
+  workwear-network:
+    driver: bridge
+
+volumes:
+  pgdata:
