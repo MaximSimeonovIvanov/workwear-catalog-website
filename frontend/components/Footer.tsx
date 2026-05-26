@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { api } from '@/lib/api';
+import Link from 'next/link';
 
 export default async function Footer() {
   const [categories, storeInfo] = await Promise.all([
@@ -73,9 +73,9 @@ export default async function Footer() {
                   </a>
                 </li>
               )}
-              {Object.entries(storeInfo.opening_hours || {}).map(([day, hours]) => (
-                <li key={day} className="text-xs">
-                  <span className="text-gray-500">{day}:</span> {hours as string}
+              {(Array.isArray(storeInfo.opening_hours) ? storeInfo.opening_hours : []).map((entry: { day: string, hours: string }) => (
+                <li key={entry.day} className="text-sm text-gray-600">
+                  <span className="font-medium">{entry.day}:</span> {entry.hours}
                 </li>
               ))}
             </ul>
