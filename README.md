@@ -3,7 +3,7 @@
 A full-stack product catalog website for a family-owned workwear store in Gabrovo, Bulgaria.
 
 **🌐 Live site:** [sim-obleklo.bg](https://sim-obleklo.bg)  
-**Stack:** Django · Next.js 14 · PostgreSQL · Docker · Cloudinary
+   **Stack:** Django · Next.js 14 · PostgreSQL · Docker · Cloudinary
 
 ---
 
@@ -165,5 +165,6 @@ POST /api/contact/            Contact form (Django endpoint — unused, handled 
 ## Author
 
 **Maxim Simeonov Ivanov**  
-your@email.com  
+
+maksimivanov@tutamail.com
 https://github.com/MaximSimeonovIvanov
