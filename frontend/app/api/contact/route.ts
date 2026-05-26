@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         <p><strong>Съобщение:</strong></p>
         <p>${message.replace(/\n/g, '<br/>')}</p>
       `,
-            reply_to: email,
+            replyTo: email,
         });
 
         return NextResponse.json({ success: true });
