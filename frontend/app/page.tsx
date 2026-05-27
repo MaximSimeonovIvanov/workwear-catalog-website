@@ -20,7 +20,7 @@ export default async function HomePage() {
               Работно облекло за всеки!
             </h1>
             <p className="mt-4 text-lg text-brand-100">
-              Висококачествено работно облекло, обувки и лични предпазни средства.
+              Над 30 години висококачествено работно облекло, обувки и лични предпазни средства.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Link
