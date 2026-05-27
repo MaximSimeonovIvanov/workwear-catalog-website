@@ -79,6 +79,7 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     material = models.CharField(max_length=200, blank=True)
+    safety_rating = models.CharField(max_length=100, blank=True)
     features = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

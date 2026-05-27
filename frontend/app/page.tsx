@@ -17,7 +17,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              Работно облекло за всеки бранш
+              Работно облекло за всеки!
             </h1>
             <p className="mt-4 text-lg text-brand-100">
               Висококачествено работно облекло, обувки и лични предпазни средства.

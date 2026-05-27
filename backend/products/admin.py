@@ -44,7 +44,21 @@ class ProductAdmin(admin.ModelAdmin):
     filter_horizontal = ['tags']
     inlines = [ProductImageInline, ProductVariantInline]
     readonly_fields = ['created_at', 'updated_at']
-
+    fieldsets = [
+        ('Основна информация', {
+            'fields': ['name', 'slug', 'category', 'brand', 'price_display', 'is_active', 'is_featured']
+        }),
+        ('Спецификации', {
+            'fields': ['material', 'safety_rating']
+        }),
+        ('Описание', {
+            'fields': ['description', 'features', 'tags']
+        }),
+        ('Системна информация', {
+            'fields': ['created_at', 'updated_at'],
+            'classes': ['collapse']
+        }),
+    ]
 
 @admin.register(StoreInfo)
 class StoreInfoAdmin(admin.ModelAdmin):
