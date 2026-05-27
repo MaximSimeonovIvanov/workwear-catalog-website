@@ -1,4 +1,5 @@
 import { api } from '@/lib/api';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -50,13 +51,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
                 {/* Images */}
                 <div className="space-y-4">
-                    <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden">
+                    <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden">
                         {primaryImage ? (
-                            <img
-                                src={primaryImage.image}
-                                alt={primaryImage.alt_text || product.name}
-                                className="w-full h-full object-cover"
-                            />
+                            <Image src={primaryImage.image} alt={primaryImage.alt_text || product.name} fill className="object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
                                 Няма снимка
@@ -68,12 +65,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     {product.images.length > 1 && (
                         <div className="flex gap-3 overflow-x-auto">
                             {product.images.map(img => (
-                                <div key={img.id} className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200">
-                                    <img
-                                        src={img.image}
-                                        alt={img.alt_text || product.name}
-                                        className="w-full h-full object-cover"
-                                    />
+                                <div key={img.id} className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-gray-200">
+                                    <Image src={img.image} alt={img.alt_text || product.name} fill className="object-cover" />
                                 </div>
                             ))}
                         </div>

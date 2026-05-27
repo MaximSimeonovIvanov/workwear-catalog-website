@@ -1,5 +1,6 @@
 import { api } from '@/lib/api';
 import { ProductList } from '@/lib/types';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -91,13 +92,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                                 href={"/shop/" + product.slug}
                                 className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group"
                             >
-                                <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                                <div className="relative aspect-square bg-gray-100">
                                     {product.primary_image ? (
-                                        <img
-                                            src={product.primary_image.image}
-                                            alt={product.primary_image.alt_text || product.name}
-                                            className="w-full h-full object-cover"
-                                        />
+                                        <Image src={product.primary_image.image} alt={product.primary_image.alt_text || product.name} fill className="object-cover" />
                                     ) : (
                                         <span className="text-gray-400 text-sm">Няма снимка</span>
                                     )}
