@@ -16,7 +16,7 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="bg-brand-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-          <div className="max-w-2xl">
+          <div className="max-w-4xl">
             <h1 className="text-4xl md:text-5xl font-bold leading-tight">
               Работно облекло за всеки!
             </h1>
