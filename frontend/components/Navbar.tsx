@@ -13,16 +13,19 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-brand-600 font-bold text-xl tracking-tight">
+            <span className="text-brand-600 font-bold text-4xl tracking-tight">
               СИМ
             </span>
-            <span className="text-gray-600 text-sm hidden sm:block">
+            <span className="text-gray-600 text-xl hidden sm:block">
               Работно Облекло
             </span>
           </Link>
 
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">
+              Начало
+            </Link>
             <Link href="/shop" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">
               Каталог
             </Link>
@@ -49,6 +52,10 @@ export default function Navbar() {
         {/* Mobile menu */}
         {menuOpen && (
           <nav className="md:hidden py-4 border-t border-gray-100 flex flex-col gap-4">
+            <Link href="/" className="text-gray-600 hover:text-brand-600 font-medium"
+              onClick={() => setMenuOpen(false)}>
+              Начало
+            </Link>
             <Link href="/shop" className="text-gray-600 hover:text-brand-600 font-medium"
               onClick={() => setMenuOpen(false)}>
               Каталог
