@@ -1,7 +1,9 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { Category, Brand, Tag } from '@/lib/types';
+import { Brand, Category, Tag } from '@/lib/types';
+import { motion } from 'framer-motion';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 interface ShopFiltersProps {
   categories: Category[];
@@ -19,6 +21,21 @@ export default function ShopFilters({ categories, brands, tags, activeFilters }:
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Track which parent categories are expanded
+  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
+
+  const toggleCategory = (categoryId: number) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryId)) {
+        next.delete(categoryId);
+      } else {
+        next.add(categoryId);
+      }
+      return next;
+    });
+  };
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -68,15 +85,46 @@ export default function ShopFilters({ categories, brands, tags, activeFilters }:
             </li>
             {parentCategories.map(category => (
               <li key={category.id}>
-                <button
-                  onClick={() => updateFilter('category', category.slug)}
-                  className={"w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors " +
-                    (activeFilters.category === category.slug ? "bg-brand-50 text-brand-700 font-medium" : "text-gray-600 hover:bg-gray-100")}
-                >
-                  {category.name}
-                </button>
+                <div className="flex items-center gap-1">
+                  {/* Category name button — filters by this category */}
+                  <button
+                    onClick={() => updateFilter('category', category.slug)}
+                    className={"flex-1 text-left text-sm px-2 py-1.5 rounded-lg transition-colors " +
+                      (activeFilters.category === category.slug ? "bg-brand-50 text-brand-700 font-medium" : "text-gray-600 hover:bg-gray-100")}
+                  >
+                    {category.name}
+                  </button>
+                  {/* Arrow toggle — only shown if category has children */}
+                  {category.children.length > 0 && (
+                    <button
+                      onClick={() => toggleCategory(category.id)}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                      aria-label={expandedCategories.has(category.id) ? "Скрий подкатегории" : "Покажи подкатегории"}
+                    >
+                      <svg
+                        className={"w-3.5 h-3.5 transition-transform duration-200 " +
+                          (expandedCategories.has(category.id) ? "rotate-180" : "")}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+                {/* Subcategories — only shown when expanded */}
                 {category.children.length > 0 && (
-                  <ul className="ml-4 mt-1 space-y-1">
+                  <motion.ul
+                    initial={false}
+                    animate={expandedCategories.has(category.id)
+                      ? { height: 'auto', opacity: 1 }
+                      : { height: 0, opacity: 0 }
+                    }
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="ml-4 mt-1 space-y-1 overflow-hidden"
+                  >
                     {category.children.map(child => (
                       <li key={child.id}>
                         <button
@@ -88,7 +136,7 @@ export default function ShopFilters({ categories, brands, tags, activeFilters }:
                         </button>
                       </li>
                     ))}
-                  </ul>
+                  </motion.ul>
                 )}
               </li>
             ))}
