@@ -121,6 +121,44 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      {/* Why choose us */}
+      <section className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Защо да изберете нас?
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: 'Над 30 години опит',
+                description: 'Дългогодишен опит в бранша и познаване нуждите на клиентите.',
+              },
+              {
+                title: 'Лично обслужване',
+                description: 'Консултация на място в магазина — не чатбот, а истински разговор.',
+              },
+              {
+                title: 'Широк асортимент',
+                description: 'Работно облекло, обувки и ЛПС за всички браншове и сезони.',
+              },
+              {
+                title: 'Удобна локация',
+                description: 'Лесно достъпен магазин с възможност за паркиране.',
+              },
+            ].map(({ title, description }) => (
+              <div key={title} className="bg-white rounded-xl p-6 border border-gray-200 text-center">
+                <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-3 h-3 rounded-full bg-brand-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
