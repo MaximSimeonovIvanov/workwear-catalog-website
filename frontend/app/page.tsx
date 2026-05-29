@@ -45,11 +45,11 @@ export default async function HomePage() {
 
       {/* About us snippet */}
       <section className="bg-white py-16 border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-3xl mx-auto px-8 sm:px-12 lg:px-8 text-center">
           <p className="text-4xl font-bold text-brand-600 mb-6">
             СИМ
           </p>
-          <p className="text-xl md:text-2xl text-gray-700 leading-relaxed mb-8">
+          <p className="text-xl md:text-2xl text-gray-700 leading-relaxed mb-8 text-justify">
             Вече повече от 30 години нашият семеен труд е неизменна част от бизнес пейзажа на Габрово – град с характер, индустриален дух и традиции, които ни вдъхновяват всеки ден. Още от първия ден нашата мисия е ясна: да предложим висококачествено работно облекло, обувки и лични предпазни средства, на които професионалистите да разчитат без компромис.
           </p>
           <Link
