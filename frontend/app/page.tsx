@@ -17,9 +17,9 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="bg-brand-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28 md:py-44">
           <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
               Работно облекло за всеки!
             </h1>
             <p className="mt-4 text-lg text-brand-100">
@@ -149,7 +149,7 @@ export default async function HomePage() {
               Защо да изберете нас?
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {[
               {
                 title: 'Над 30 години опит',
