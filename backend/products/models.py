@@ -134,7 +134,7 @@ class StoreInfo(models.Model):
     email = models.EmailField()
     opening_hours = models.JSONField(default=dict)
     about_text = models.TextField()
-    google_maps_embed_url = models.URLField(blank=True)
+    google_maps_embed_url = models.URLField(max_length=500, blank=True)
 
     class Meta:
         verbose_name_plural = 'Store Info'
