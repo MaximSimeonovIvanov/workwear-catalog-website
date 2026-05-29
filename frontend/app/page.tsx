@@ -1,13 +1,14 @@
 import { api } from '@/lib/api';
 import { Category, ProductList } from '@/lib/types';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
+  const [products, categories, storeInfo] = await Promise.all([
     api.products.list('featured=true'),
     api.categories.list(),
+    api.store.info(),
   ]);
 
   const parentCategories = categories.filter(c => c.parent === null);
@@ -63,7 +64,7 @@ export default async function HomePage() {
       {/* Categories */}
       {parentCategories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
             Категории
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -91,7 +92,7 @@ export default async function HomePage() {
       {products.length > 0 && (
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
               Препоръчани продукти
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -144,7 +145,7 @@ export default async function HomePage() {
       <section className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-4xl font-bold text-gray-900">
               Защо да изберете нас?
             </h2>
           </div>
@@ -178,6 +179,107 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Contact snippet */}
+      {storeInfo && (
+        <section className="bg-white py-16 border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+              {/* Left: contact details */}
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-8">
+                  Контакти
+                </h2>
+                <div className="flex flex-col gap-5">
+                  {storeInfo.address && (
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center shrink-0">
+                        <MapPin size={20} className="text-brand-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-0.5">Адрес</p>
+                        <p className="text-gray-500">{storeInfo.address}</p>
+                      </div>
+                    </div>
+                  )}
+                  {storeInfo.phone && (
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center shrink-0">
+                        <Phone size={20} className="text-brand-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-0.5">Телефон</p>
+                        <a href={`tel:${storeInfo.phone}`}
+                          className="text-brand-600 hover:text-brand-700 transition-colors">
+                          {storeInfo.phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {storeInfo.email && (
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center shrink-0">
+                        <Mail size={20} className="text-brand-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-0.5">Имейл</p>
+                        <a href={`mailto:${storeInfo.email}`}
+                          className="text-brand-600 hover:text-brand-700 transition-colors">
+                          {storeInfo.email}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {Array.isArray(storeInfo.opening_hours) && storeInfo.opening_hours.length > 0 && (
+                    <div className="mt-2 p-5 bg-gray-50 rounded-xl">
+                      <p className="font-semibold text-gray-900 mb-3">Работно време</p>
+                      <div className="flex flex-col gap-1.5">
+                        {storeInfo.opening_hours.map((entry: { day: string; hours: string }, i: number) => (
+                          <div key={i} className="flex justify-between text-sm">
+                            <span className="text-gray-600">{entry.day}</span>
+                            <span className="font-medium text-gray-900">{entry.hours}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 mt-8 bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-brand-700 transition-colors"
+                >
+                  Изпратете запитване <ArrowRight size={18} />
+                </Link>
+              </div>
+
+              {/* Right: Google Maps embed */}
+              <div className="w-full h-80 lg:h-full min-h-[400px] rounded-xl overflow-hidden border border-gray-100">
+                {storeInfo.google_maps_embed_url ? (
+                  <iframe
+                    src={storeInfo.google_maps_embed_url}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, minHeight: '400px' }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Местоположение на магазина"
+                  />
+                ) : (
+                  <div className="w-full h-full min-h-[400px] bg-gray-50 flex items-center justify-center text-center p-8">
+                    <div className="text-gray-400">
+                      <MapPin size={48} className="mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">Картата ще се появи след като добавите Google Maps URL в администраторския панел</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
