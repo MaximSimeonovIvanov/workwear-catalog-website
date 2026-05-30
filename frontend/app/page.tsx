@@ -19,7 +19,7 @@ export default async function HomePage() {
       <section className="bg-brand-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28 md:py-44">
           <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight">
               <span className="block md:inline">Работно </span>
               <span className="block md:inline">облекло</span>
               <br className="hidden md:block" />
