@@ -12,6 +12,12 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://sim-obleklo.bg',
+    'https://www.sim-obleklo.bg',
+    'https://api.sim-obleklo.bg',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
