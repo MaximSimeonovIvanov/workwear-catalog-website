@@ -80,8 +80,8 @@ export default async function Footer() {
                 </li>
               )}
               {(Array.isArray(storeInfo.opening_hours) ? storeInfo.opening_hours : []).map((entry: { day: string, hours: string }) => (
-                <li key={entry.day} className="text-sm text-gray-400 flex justify-between gap-4 max-w-[220px] mx-auto sm:mx-0">
-                  <span>{entry.day}</span>
+                <li key={entry.day} className="text-sm text-gray-400 flex gap-4">
+                  <span className="shrink-0 w-24">{entry.day}</span>
                   <span className="text-gray-300">{entry.hours}</span>
                 </li>
               ))}

@@ -239,8 +239,8 @@ export default async function HomePage() {
                       <p className="font-semibold text-gray-900 mb-3 text-center lg:text-left">Работно време</p>
                       <div className="flex flex-col gap-1.5 items-center lg:items-start">
                         {storeInfo.opening_hours.map((entry: { day: string; hours: string }, i: number) => (
-                          <div key={i} className="flex justify-between text-sm w-48">
-                            <span className="text-gray-600">{entry.day}</span>
+                          <div key={i} className="flex gap-4 text-sm">
+                            <span className="text-gray-600 shrink-0 w-28">{entry.day}</span>
                             <span className="font-medium text-gray-900">{entry.hours}</span>
                           </div>
                         ))}
