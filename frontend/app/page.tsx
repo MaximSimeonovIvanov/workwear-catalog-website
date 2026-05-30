@@ -237,10 +237,10 @@ export default async function HomePage() {
                   {Array.isArray(storeInfo.opening_hours) && storeInfo.opening_hours.length > 0 && (
                     <div className="mt-2 p-5 bg-gray-50 rounded-xl">
                       <p className="font-semibold text-gray-900 mb-3 text-center lg:text-left">Работно време</p>
-                      <div className="flex flex-col gap-1.5 items-center lg:items-start">
+                      <div className="flex flex-col gap-1.5">
                         {storeInfo.opening_hours.map((entry: { day: string; hours: string }, i: number) => (
                           <div key={i} className="flex gap-4 text-sm">
-                            <span className="text-gray-600 shrink-0 w-28">{entry.day}</span>
+                            <span className="text-gray-600 shrink-0 w-24">{entry.day}</span>
                             <span className="font-medium text-gray-900">{entry.hours}</span>
                           </div>
                         ))}
