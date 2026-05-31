@@ -1,27 +1,25 @@
 name: Deploy to Production
-
 on:
   push:
     branches: [main]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 2222
+          port: 22
           script: |
             cd /opt/workwear-catalog
             git pull origin main
             docker compose -f docker-compose.prod.yml up -d --build
             docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate
+            sudo chown -R max:max /opt/workwear-catalog/backend/staticfiles
+            docker compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput
             docker image prune -f
