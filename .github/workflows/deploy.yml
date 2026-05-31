@@ -20,6 +20,5 @@ jobs:
             git pull origin main
             docker compose -f docker-compose.prod.yml up -d --build
             docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate
-            sudo chown -R max:max /opt/workwear-catalog/backend/staticfiles
-            docker compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput
+            docker compose -f docker-compose.prod.yml exec -T --user root backend python manage.py collectstatic --noinput
             docker image prune -f
