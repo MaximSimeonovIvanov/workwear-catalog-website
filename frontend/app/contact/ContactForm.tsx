@@ -1,30 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 
 export default function ContactForm() {
     const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
     const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!turnstileToken) {
+            return;
+        }
+
         setStatus('sending');
 
         try {
             const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify({ ...form, turnstileToken }),
             });
 
             if (res.ok) {
                 setStatus('success');
                 setForm({ name: '', email: '', phone: '', message: '' });
+                setTurnstileToken(null);
             } else {
                 setStatus('error');
+                turnstileRef.current?.reset();
             }
         } catch {
             setStatus('error');
+            turnstileRef.current?.reset();
         }
     };
 
@@ -85,13 +96,21 @@ export default function ContactForm() {
                 />
             </div>
 
+            <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={token => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+            />
+
             {status === 'error' && (
                 <p className="text-red-600 text-sm">Грешка при изпращане. Моля опитайте отново.</p>
             )}
 
             <button
                 type="submit"
-                disabled={status === 'sending'}
+                disabled={status === 'sending' || !turnstileToken}
                 className="w-full bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50"
             >
                 {status === 'sending' ? 'Изпращане...' : 'Изпрати съобщение'}
