@@ -22,6 +22,8 @@ This project was built end-to-end: discovery and planning, data modelling, REST 
 - Server-side rendering and ISR (Incremental Static Regeneration) for SEO
 - Image storage and delivery via Cloudinary CDN
 - Contact form with transactional email delivery via Resend
+- Bot protection on contact form via Cloudflare Turnstile (invisible challenge)
+- API rate limiting — 60 requests/min per IP via DRF throttling
 - Bulgarian-language admin panel for non-technical store owner
 - Fully responsive, mobile-first design with animated Framer Motion components
 - Parent/child category hierarchy with expandable sidebar navigation
@@ -44,6 +46,7 @@ This project was built end-to-end: discovery and planning, data modelling, REST 
 | Database | PostgreSQL 16 | Reliable, fits Django ORM perfectly |
 | Image Storage | Cloudinary | Auto-optimization, CDN delivery, survives container restarts |
 | Email | Resend | Transactional email API, free tier |
+| Bot Protection | Cloudflare Turnstile | Invisible CAPTCHA alternative on contact form |
 | Containerization | Docker + Docker Compose | Identical dev and production environments |
 | Reverse Proxy | Nginx Proxy Manager | Already running in homelab; no new service needed |
 | CI/CD | GitHub Actions | Auto-deploy on push to `main` |
@@ -88,6 +91,22 @@ Cloudflare → public internet → customers
 
 ---
 
+## Security
+
+Defence in depth — multiple independent layers, each handling a different threat:
+
+| Layer | What it protects against |
+|---|---|
+| Cloudflare | DDoS, volumetric attacks, malicious bots before they reach the server |
+| Cloudflare Turnstile | Automated contact form spam and abuse |
+| DRF throttling (60 req/min) | API scraping, enumeration, automated abuse |
+| Fail2ban | SSH brute-force attacks |
+| UFW | All ports locked down except 22, 80, 443, 51820 |
+
+**API rate limiting implementation note:** Django's default `LocMemCache` is per-process — with 3 Gunicorn workers, each worker maintains its own independent counter, so a 60/min limit would effectively become 180/min. Fixed by switching to `FileBasedCache`, which writes counters to a shared directory on the container filesystem that all workers read and write together.
+
+---
+
 ## Infrastructure Notes
 
 This project is hosted on a personal homelab server rather than a cloud VPS. This was a deliberate decision and a significant part of the learning experience.
@@ -97,6 +116,7 @@ This project is hosted on a personal homelab server rather than a cloud VPS. Thi
 - **Development workflow:** VS Code Remote SSH editing files directly on the server
 - **Home IP exposure:** Cloudflare proxy (orange cloud) hides the real home IP from the public internet
 - **Resilience:** All Docker containers run with `restart: unless-stopped` — if the server reboots, everything comes back automatically
+- **Dynamic IP:** A cron job checks the current public IP every 5 minutes and updates the Cloudflare A record via API if it has changed
 
 ---
 
@@ -152,8 +172,13 @@ CLOUDINARY_API_SECRET
 RESEND_API_KEY
 CONTACT_EMAIL
 NEXT_PUBLIC_API_URL
+NEXT_PUBLIC_TURNSTILE_SITE_KEY
 DB_PASSWORD
 ```
+
+`TURNSTILE_SECRET_KEY` is required in `.env.production` on the server (never committed to Git).
+
+**Note on `NEXT_PUBLIC_` variables:** Next.js bakes these into the JavaScript bundle at build time, not runtime. They must be passed to the Docker build as build args — see `docker-compose.prod.yml` and `Dockerfile.prod`.
 
 ---
 
@@ -163,7 +188,7 @@ DB_PASSWORD
 workwear-catalog/
 ├── backend/
 │   ├── config/
-│   │   ├── settings.py           # Django settings
+│   │   ├── settings.py           # Django settings (throttling, cache, CSRF)
 │   │   └── urls.py
 │   ├── products/
 │   │   ├── models.py             # All data models
@@ -184,8 +209,8 @@ workwear-catalog/
 │   │   │   └── [slug]/page.tsx   # Product detail (ISR)
 │   │   ├── categories/[slug]/    # Category pages
 │   │   ├── about/                # About page
-│   │   ├── contact/              # Contact page + form
-│   │   └── api/contact/          # Server-side email handler
+│   │   ├── contact/              # Contact page + Turnstile-protected form
+│   │   └── api/contact/          # Server-side email handler with Turnstile verification
 │   ├── components/
 │   │   ├── Navbar.tsx            # Animated hamburger menu
 │   │   └── Footer.tsx            # Dynamic footer (fetches StoreInfo)
@@ -195,9 +220,9 @@ workwear-catalog/
 │   ├── next.config.mjs
 │   ├── next-sitemap.config.js
 │   ├── Dockerfile
-│   └── Dockerfile.prod           # Multi-stage production build
+│   └── Dockerfile.prod           # Multi-stage build with ARG for public env vars
 ├── docker-compose.yml            # Development
-├── docker-compose.prod.yml       # Production
+├── docker-compose.prod.yml       # Production (includes build args for frontend)
 └── .github/
     └── workflows/
         └── deploy.yml            # GitHub Actions CI/CD
@@ -216,6 +241,8 @@ GET  /api/tags/               Tag list
 GET  /api/store-info/         Store details (address, hours, contact)
 POST /api/contact/            Contact form submission
 ```
+
+All anonymous API endpoints are throttled at 60 requests/min per IP.
 
 ---
 
@@ -255,6 +282,14 @@ Catalog filters are stored in URL query params (`?category=uniforms&brand=portwe
 ### ISR Caching
 All API fetches use `next: { revalidate: 60 }` — 60 second cache with background revalidation. Product pages stay fast and fresh without a full rebuild on every content change.
 
+### Rate Limiting with Shared Cache
+DRF's `AnonRateThrottle` counts requests per IP using Django's cache backend. Django's default `LocMemCache` is per-process — each Gunicorn worker has its own independent counter, making the throttle ineffective in a multi-worker setup. `FileBasedCache` solves this by writing counters to a shared directory on the container filesystem, giving all workers a single shared counter.
+
+### Cloudflare Turnstile Integration
+The contact form uses Cloudflare's Turnstile widget for bot protection. The browser receives a one-time token after an invisible challenge. The Next.js API route verifies that token against Cloudflare's siteverify endpoint before sending any email. The submit button is disabled until a valid token is received, making automated submissions impossible.
+
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` must be available at Docker build time (not runtime) because Next.js bakes `NEXT_PUBLIC_` variables into the JS bundle during `npm run build`. It is passed via Docker build args in `docker-compose.prod.yml` rather than copied from `.env.production` (which lives outside the Docker build context).
+
 ### Static Files in Production
 Django does not serve static files when `DEBUG=False` — this is by design. In production, a Docker volume (`static_files`) is shared between the Django container and Nginx Proxy Manager. NPM serves `/static/` requests directly from disk via an `alias` directive, bypassing Django entirely.
 
@@ -283,7 +318,7 @@ This project involved significant real-world debugging across infrastructure, ne
 
 **Cloudflare + NPM redirect loop:** Cloudflare strips SSL and forwards HTTP to the origin server. NPM's "Force SSL" saw HTTP and redirected to HTTPS — which went back to Cloudflare, which forwarded as HTTP again. Infinite 301 loop. Fixed by disabling Force SSL on the API proxy host (Cloudflare handles HTTPS externally) and setting Cloudflare SSL mode to Full (strict).
 
-**NPM custom location overwriting:** Every time a proxy host is saved through NPM's UI, it regenerates the Nginx config and injects `proxy_pass` into custom location blocks, overriding the `alias` directive. In Nginx, `proxy_pass` and `alias` cannot coexist — `proxy_pass` wins and the file serving breaks. Fix: edit the conf file directly after every NPM save and reload Nginx manually.
+**NPM custom location overwriting:** Every time a proxy host is saved through NPM's UI, it regenerates the Nginx config and injects `proxy_pass` into custom location blocks, overriding the `alias` directive. In Nginx, `proxy_pass` and `alias` cannot coexist — `proxy_pass` wins and the file serving breaks. Fix: move the static location config to NPM's Advanced tab (server-level custom Nginx configuration field), which NPM does not overwrite on save.
 
 **collectstatic 0 files bug:** `python manage.py collectstatic` reported "0 files copied" to an empty directory. Root cause: the `staticfiles` directory on the host was owned by `root` (created by Docker), so Django could list files but couldn't write. Fixed with `sudo chown -R max:max ./backend/staticfiles`.
 
@@ -293,6 +328,12 @@ This project involved significant real-world debugging across infrastructure, ne
 
 **DNS challenge propagation timing:** Certbot created the TXT record in Cloudflare but Let's Encrypt verified before it had propagated. Fixed by setting Propagation Seconds to 120 in NPM.
 
+**DRF throttling not firing with multiple Gunicorn workers:** All 65 test requests returned 200 despite a 60/min limit. Root cause: Django's default `LocMemCache` is per-process. With 3 workers each seeing ~22 requests, none ever reached 60. Fixed by switching to `FileBasedCache` — all workers share the same on-disk counters.
+
+**`NEXT_PUBLIC_` variable undefined in production bundle:** Turnstile's site key was `undefined` in the browser despite being in `.env.production`. Root cause: `.env.production` lives outside the Docker build context (`frontend/` directory), so Docker never copies it into the build. Next.js bakes `NEXT_PUBLIC_` variables at build time, not runtime — if the variable isn't present during `npm run build`, the bundle contains `undefined` forever. Fixed by passing the value as a Docker build arg in `docker-compose.prod.yml` and declaring it as `ARG` + `ENV` in `Dockerfile.prod`.
+
+**Docker layer cache serving stale build:** After adding the env var, rebuilding without `--no-cache` finished in 1.4 seconds with all steps marked `CACHED` — the bundle still contained `undefined`. Docker saw no source file changes and reused the previous build entirely. Fixed with `docker compose build --no-cache frontend`.
+
 ---
 
 ## Deployment
@@ -300,6 +341,7 @@ This project involved significant real-world debugging across infrastructure, ne
 Production uses a separate `docker-compose.prod.yml`:
 - Backend runs Gunicorn (`--workers 3`) instead of Django's dev server
 - Frontend uses a multi-stage Docker build — only the `.next/standalone` output is included, no source code or node_modules
+- Frontend build receives `NEXT_PUBLIC_TURNSTILE_SITE_KEY` as a build arg from `.env.production`
 - Containers use `expose` instead of `ports` — not directly accessible from host, only through NPM
 - Environment variables loaded from `.env.production` (not in Git)
 
@@ -317,19 +359,15 @@ GitHub Actions deploys on every push to `main`:
 ## Roadmap & Known Issues
 
 ### Known Issues
-- **NPM conf overwriting:** Every NPM proxy host save regenerates `12.conf` and re-injects `proxy_pass` into the `/static/` location, breaking static file serving. Requires manual conf edit + nginx reload after every NPM save. Permanent fix: move the static location config to NPM's server-level custom Nginx configuration field, which NPM does not overwrite.
-- **collectstatic not automated:** Static files were copied manually for the initial deployment. The GitHub Actions pipeline does not yet run `collectstatic` automatically. This means Django admin CSS will not update after a Django upgrade until collectstatic is run manually.
+- **collectstatic not automated:** Static files were copied manually for the initial deployment. The GitHub Actions pipeline does not run `collectstatic` automatically due to a TTY compatibility issue with `docker compose exec -T`. Run manually after Django upgrades using `manage.py shell -c "from django.core.management import call_command; call_command('collectstatic', interactive=False)"`.
 
 ### Planned Improvements
-- Dynamic Cloudflare IP updater script — cron job to update the A record if the home IP changes (ISP may assign dynamic IPs)
-- Automate `collectstatic` in the GitHub Actions deploy pipeline
 - Upgrade Next.js from 14.x (has known CVEs: DoS, cache poisoning, HTTP request smuggling)
 - Category image overlays — the `Category.image` field exists in the model; needs category images uploaded first
 - Animated product photos section on home page (Framer Motion horizontal scroll with hover)
 - Google Search Console setup and sitemap submission
 - Google Business Profile for local SEO in Gabrovo
 - Dynamic ISR webhook — Django fires a webhook when a product is saved, Next.js revalidates immediately instead of waiting 60 seconds
-- Restore WireGuard + AdGuard DNS integration (currently hardcoded to 8.8.8.8 after an incident)
 
 ### Future: E-commerce Expansion
 The catalog architecture was designed to extend cleanly into e-commerce without rebuilding:
