@@ -9,4 +9,7 @@ module.exports = {
         ],
     },
     exclude: ['/api/*'],
+    additionalPaths: async (config) => [
+        await config.transform(config, '/shop'),
+    ],
 };
